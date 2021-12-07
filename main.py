@@ -7,9 +7,15 @@ pygame.init()
 screen = pygame.display.set_mode((400, 500))
 clock = pygame.time.Clock()
 FPS = 90
+thememusic = pygame.mixer.music.load('thememusic3.mp3')
+gameovermusic = pygame.mixer.Sound('gameover.mp3')
+pygame.mixer.music.play()
+font = pygame.font.SysFont('monospace',20)
+score = 0
 
 # Color command
 black = (0,0,0)
+white = (255,255,255)
 
 pygame.display.set_caption("Coronie Journey")
 keys = pygame.key.get_pressed()
@@ -33,14 +39,13 @@ coroniehit = pygame.image.load('coronie9.png')
 coroniehit = pygame.transform.scale(coroniehit, (70, 70))
 
 # Coronie's weapon - flame
-# Load image, scale, put into rectangle, declare motion variables
+# Load image, scale, put into rectangle, declare motion variables, add sound effect
 fire = pygame.image.load('purpleflame.png')
 fire = pygame.transform.scale(fire, (70, 50))
 fire_rect = fire.get_rect(center=(-500,-500))
 fire_movex = 0
-shock = pygame.image.load('electricshock1.png')
-shock = pygame.transform.scale(shock, (100, 100))
-shock_rect = shock.get_rect()
+firesound = pygame.mixer.Sound('fireshoot.mp3')
+firehitsound = pygame.mixer.Sound('enemiehit.mp3')
 
 # Physical Barrier: Mucus
 # Load image, scale, create list of mucus, create event to spawn mucus & set event timer
@@ -190,11 +195,8 @@ def collision(bcells):
             sys.exit()
         if fire_rect.colliderect(bcell):
             if fire_rect.centerx >= (bcell.top + 15) and fire_rect.centerx <= (bcell.bottom - 15):
-                shock_rect.centerx = fire.rect.centerx
-                shock_rect.centery = fire.rect.centery
-                screen.blit(shock,shock_rect)
-                pygame.display.update()
                 bcell.centerx = -100
+                firehitsound.play()
 
 def collision(tcells):
     for tcell in tcells:
@@ -206,6 +208,7 @@ def collision(tcells):
         if fire_rect.colliderect(tcell):
             if fire_rect.centerx >= (tcell.top + 15) and fire_rect.centerx <= (tcell.bottom - 15):
                 tcell.centerx = -100
+                firehitsound.play()
 
 def collision(nkcells):
     for nkcell in nkcells:
@@ -217,12 +220,14 @@ def collision(nkcells):
         if fire_rect.colliderect(nkcell):
             if fire_rect.centerx >= (nkcell.top + 15) and fire_rect.centerx <= (nkcell.bottom - 15):
                 nkcell.centerx = -100
+                firehitsound.play()
 
 # A function of the animation of "Game Over" event. Coronie's face will turn in to crying face
 # A "GAME OVER" board will appear on the screen and exit the game
 def game_over():
     screen.blit(coroniehit, coronie_rect)
     pygame.display.update()
+    gameovermusic.play()
     pygame.time.delay(500)
     gameover = pygame.image.load('gameover.png ')
     gameover = pygame.transform.scale(gameover, (200,200))
@@ -253,6 +258,7 @@ while running:
                 fire_rect.centery = coronie_rect.centery
                 fire_rect.centerx = 170
                 fire_movex = 2
+                firesound.play()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_UP:
                 coronie_movey_change = -0.5
@@ -299,14 +305,18 @@ while running:
         fire_rect.centerx = 2000
     fire_rect.centerx = fire_rect.centerx + fire_movex
     screen.blit(fire, fire_rect)
+# Count score. 10 score went up every second
+    scoretext = font.render("Score: {0}".format(int(score)), 1, white)
+    screen.blit(scoretext, (20, 80))
+    score = score + 0.1
 
 # Adding new position of mucus and enemie to the list, and draw mucus and enemie from that list
 # In order to create sequential event, I separate timing into which the first few scene would only spawn mucus
 # And later on would spawn enemies only
-    if pygame.time.get_ticks() <= 9999:
+    if pygame.time.get_ticks() <= 19999:
         mucus_list = move_mucuss(mucus_list)
         draw_mucuss(mucus_list)
-    elif pygame.time.get_ticks() >= 1000:
+    elif pygame.time.get_ticks() >= 20000:
         bcell_list = move_bcell(bcell_list)
         draw_bcell(bcell_list)
         tcell_list = move_tcell(tcell_list)
