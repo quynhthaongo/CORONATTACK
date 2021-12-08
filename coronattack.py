@@ -42,7 +42,7 @@ coroniehit = pygame.transform.scale(coroniehit, (70, 70))
 # Load image, scale, put into rectangle, declare motion variables, add sound effect
 fire = pygame.image.load('purpleflame.png')
 fire = pygame.transform.scale(fire, (70, 50))
-fire_rect = fire.get_rect(center=(-500,-500))
+fire_rect = fire.get_rect(center=(2000,2000))
 fire_movex = 0
 firesound = pygame.mixer.Sound('fireshoot.mp3')
 firehitsound = pygame.mixer.Sound('enemiehit.mp3')
@@ -253,10 +253,13 @@ while running:
             if event.key == pygame.K_DOWN:
                 coronie_movey_change = 1.5
             if event.key == pygame.K_SPACE:
-                fire_rect.centery = coronie_rect.centery
-                fire_rect.centerx = 170
-                fire_movex = 2
-                firesound.play()
+                if fire_rect.centerx >= 400:
+                    fire_rect.centery = coronie_rect.centery
+                    fire_rect.centerx = 170
+                    fire_movex = 5
+                    firesound.play()
+                else:
+                    pass
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_UP:
                 coronie_movey_change = -0.5
